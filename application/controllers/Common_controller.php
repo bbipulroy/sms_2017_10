@@ -23,4 +23,23 @@ class Common_controller extends Root_Controller
 
         $this->json_return($ajax);
     }*/
+    public function get_current_stock()
+    {
+        $warehouse_id = $this->input->post('warehouse_id');
+        $pack_size_id = $this->input->post('pack_size_id');
+        $variety_id = $this->input->post('variety_id');
+        $html_container_id='#current_stock_id';
+        if($this->input->post('html_container_id'))
+        {
+            $html_container_id=$this->input->post('html_container_id');
+        }
+        $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'current_stock',array('variety_id ='.$variety_id,'pack_size_id ='.$pack_size_id,'warehouse_id ='.$warehouse_id),1);
+        if(!$result)
+        {
+            $result['current_stock']='Not Found';
+        }
+        $ajax['system_content'][]=array("id"=>$html_container_id,"html"=>$result['current_stock'],true);
+        $ajax['status']=true;
+        $this->json_return($ajax);
+    }
 }

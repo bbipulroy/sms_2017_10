@@ -64,42 +64,35 @@ class Stock_in extends Root_Controller
     private function system_get_items()
     {
         $items=array();
-        $bulk=$this->config->item('table_sms_bulk');
-        $packet=$this->config->item('table_sms_packet');
-        $warehouse=$this->config->item('table_login_basic_setup_warehouse');
-        $packsize=$this->config->item('table_login_setup_classification_vpack_size');
-        $varieties=$this->config->item('table_login_setup_classification_varieties');
-        $crop_types=$this->config->item('table_login_setup_classification_crop_types');
-        $crops=$this->config->item('table_login_setup_classification_crops');
 
-        //To increase performance
-        $query="SELECT t.*, w.name as warehouse_name, ps.name as packsize_name, v.name as variety_name, ct.name as crop_type_name, cr.name as crop_name
-		From (SELECT CONCAT(b.id,'_Bulk') as id,'Bulk' as type,b.variety_id,'NULL' as packsize_id,b.warehouse_id,b.quantity,b.purpose,b.status
-		FROM $bulk as b
-		WHERE b.purpose = 'stock_in'
-		UNION ALL
-		SELECT CONCAT(p.id,'_Pack') as id,'Packet' as type, p.variety_id,p.packsize_id,p.warehouse_id,p.quantity,p.purpose,p.status
-		FROM $packet as p
-		WHERE p.purpose = 'stock_in') t
-		LEFT JOIN $warehouse as w on w.id = t.warehouse_id
-		LEFT JOIN $packsize as ps on ps.id = t.packsize_id
-		LEFT JOIN $varieties as v on v.id = t.variety_id
-		LEFT JOIN $crop_types as ct on ct.id = v.crop_type_id
-		LEFT JOIN $crops as cr on cr.id = ct.crop_id";
-        $query=$this->db->query($query);
-        $items=$query->result_array();
+        $this->db->select('stock_in.*');
+        $this->db->select('variety.name variety_name');
+        $this->db->select('type.name crop_type_name');
+        $this->db->select('crop.name crop_name');
+        $this->db->select('pack.name pack_name');
+        $this->db->select('warehouse.name warehouse_name');
+        $this->db->from($this->config->item('table_sms_stock_in').' stock_in');
+        $this->db->join($this->config->item('table_login_setup_classification_varieties').' variety','variety.id = stock_in.variety_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_crop_types').' type','type.id = variety.crop_type_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
+        $this->db->join($this->config->item('table_login_setup_classification_vpack_size').' pack','pack.id = stock_in.pack_size_id','LEFT');
+        $this->db->join($this->config->item('table_login_basic_setup_warehouse').' warehouse','warehouse.id = stock_in.warehouse_id','INNER');
+        $this->db->where('stock_in.status',$this->config->item('system_status_active'));
+        $this->db->or_where('stock_in.status',$this->config->item('system_status_delete'));
+        $this->db->order_by('stock_in.date_created','DESC');
+        $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
-            if($item['packsize_name'])
+            if(!$item['pack_name'])
             {
-                $item['packsize_name']=$item['packsize_name'].' gm';
+                $item['pack_name']='Bulk';
+                $item['quantity']=number_format($item['quantity'],3);
             }
             else
             {
-                $item['packsize_name']='';
+                $item['pack_name']=$item['pack_name'].' gm';
             }
         }
-        //print_r($items);exit;
         $this->json_return($items);
     }
     private function system_add()
@@ -112,8 +105,7 @@ class Stock_in extends Root_Controller
                 'crop_id'=>0,
                 'crop_type_id'=>0,
                 'variety_id'=>0,
-                'type'=>'',
-                'packsize_id' => '',
+                'pack_size_id' => '',
                 'warehouse_id' => '',
                 'quantity' => '',
                 'remarks' => ''
@@ -125,7 +117,7 @@ class Stock_in extends Root_Controller
             $data['packs']=Query_helper::get_info($this->config->item('table_login_setup_classification_vpack_size'),array('id value','name text'),array('status ="'.$this->config->item('system_status_active').'"'));
             $ajax['system_page_url']=site_url($this->controller_url."/index/add");
             $ajax['status']=true;
-            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add",$data,true));
+            $ajax['system_content'][]=array("id"=>"#system_content","html"=>$this->load->view($this->controller_url."/add_edit",$data,true));
             if($this->message)
             {
                 $ajax['system_message']=$this->message;
@@ -147,7 +139,7 @@ class Stock_in extends Root_Controller
     {
         $id = $this->input->post("id");
         $user = User_helper::get_user();
-        $time=time();
+        $time = time();
         if($id>0)
         {
             if(!(isset($this->permissions['action2']) && ($this->permissions['action2']==1)))
@@ -175,9 +167,6 @@ class Stock_in extends Root_Controller
         else
         {
             $data=$this->input->post('item');
-            $data['factor']=1;
-            $data['purpose']='stock_in';
-            $data['status']=$this->config->item('system_status_active');
             $this->db->trans_start();  //DB Transaction Handle START
             if($id>0)
             {
@@ -185,21 +174,30 @@ class Stock_in extends Root_Controller
             }
             else
             {
-                if($data['type_id']==1)
+                $data['status']=$this->config->item('system_status_active');
+                $data['user_created'] = $user->user_id;
+                $data['date_created'] = time();
+                Query_helper::add($this->config->item('table_sms_stock_in'),$data);
+
+                $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$data['variety_id'],'pack_size_id ='.$data['pack_size_id'],'warehouse_id ='.$data['warehouse_id']),1);
+                if($result)
                 {
-                    unset($data['type_id']);
-                    unset($data['packsize_id']);
-                    $data['user_created'] = $user->user_id;
-                    $data['date_created'] = time();
-                    Query_helper::add($this->config->item('table_sms_bulk'),$data);
+                    $s_data['in_stock'] = $data['quantity']+$result['in_stock'];
+                    $s_data['current_stock'] = $data['quantity']+$result['current_stock'];
+                    $s_data['date_updated'] = $time;
+                    $s_data['user_updated'] = $user->user_id;
+                    Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result['id']));
                 }
                 else
                 {
-                    unset($data['type_id']);
-                    $data['transfer_id']=NULL;
-                    $data['user_created'] = $user->user_id;
-                    $data['date_created'] = time();
-                    Query_helper::add($this->config->item('table_sms_packet'),$data);
+                    $s_data['variety_id'] = $data['variety_id'];
+                    $s_data['pack_size_id'] = $data['pack_size_id'];
+                    $s_data['warehouse_id'] = $data['warehouse_id'];
+                    $s_data['in_stock'] = $data['quantity'];
+                    $s_data['current_stock'] = $data['quantity'];
+                    $s_data['date_updated'] = $time;
+                    $s_data['user_updated'] = $user->user_id;
+                    Query_helper::add($this->config->item('table_sms_stock_summary'),$s_data);
                 }
             }
             $this->db->trans_complete();   //DB Transaction Handle END
@@ -228,15 +226,9 @@ class Stock_in extends Root_Controller
     {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('item[variety_id]',$this->lang->line('LABEL_VARIETY'),'required');
-        $this->form_validation->set_rules('item[type_id]',$this->lang->line('LABEL_TYPE'),'required');
+        $this->form_validation->set_rules('item[pack_size_id]','Pack Size','required');
         $this->form_validation->set_rules('item[warehouse_id]',$this->lang->line('LABEL_WAREHOUSE'),'required');
         $this->form_validation->set_rules('item[quantity]',$this->lang->line('LABEL_QUANTITY'),'required');
-        $item=$this->input->post('item');
-
-        if($item['type_id']=='2')
-        {
-            $this->form_validation->set_rules('item[packsize_id]','Pack Size','required');
-        }
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();
