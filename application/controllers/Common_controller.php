@@ -38,6 +38,17 @@ class Common_controller extends Root_Controller
         {
             $result['current_stock']='Not Found';
         }
+        else
+        {
+            if($pack_size_id>0)
+            {
+                $result['current_stock']=$result['current_stock'].' packet';
+            }
+            else
+            {
+                $result['current_stock']=$result['current_stock'].' gm';
+            }
+        }
         $ajax['system_content'][]=array("id"=>$html_container_id,"html"=>$result['current_stock'],true);
         $ajax['status']=true;
         $this->json_return($ajax);

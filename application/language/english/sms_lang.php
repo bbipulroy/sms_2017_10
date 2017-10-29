@@ -238,3 +238,6 @@ $lang['LABEL_PURPOSE'] = 'Purpose';
 $lang['LABEL_CROP_NAME']='Crop';
 $lang['LABEL_CROP_TYPE']='Crop Type';
 $lang['LABEL_VARIETY']='Variety';
+$lang['LABEL_DATE_STOCK_IN']='Stock In date';
+$lang['LABEL_STOCK_IN']='Stock In';
+$lang['LABEL_EXCESS']='Excess';

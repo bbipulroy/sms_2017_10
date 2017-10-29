@@ -18,6 +18,16 @@ if(isset($CI->permissions['action2']) && ($CI->permissions['action2']==1))
         'data-action-link'=>site_url($CI->controller_url.'/index/edit')
     );
 }
+if(isset($CI->permissions['action3']) && ($CI->permissions['action3']==1))
+{
+    $action_buttons[]=array(
+        'type'=>'button',
+        'label'=>$CI->lang->line('ACTION_DELETE'),
+        'data-message-confirm'=>'Are you sure to Delete this stock?',
+        'class'=>'button_jqx_action',
+        'data-action-link'=>site_url($CI->controller_url.'/index/delete')
+    );
+}
 if(isset($CI->permissions['action4']) && ($CI->permissions['action4']==1))
 {
     $action_buttons[]=array(
@@ -61,6 +71,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <label class="checkbox-inline"><input type="checkbox" class="system_jqx_column" checked value="warehouse_name"><?php echo $CI->lang->line('LABEL_WAREHOUSE'); ?></label>
             <label class="checkbox-inline"><input type="checkbox" class="system_jqx_column" checked value="pack_name">Pack Size</label>
             <label class="checkbox-inline"><input type="checkbox" class="system_jqx_column" checked value="quantity"><?php echo $CI->lang->line('LABEL_QUANTITY'); ?></label>
+            <label class="checkbox-inline"><input type="checkbox" class="system_jqx_column" checked value="purpose"><?php echo $CI->lang->line('LABEL_PURPOSE'); ?></label>
             <label class="checkbox-inline"><input type="checkbox" class="system_jqx_column" checked value="remarks"><?php echo $CI->lang->line('LABEL_REMARKS'); ?></label>
             <label class="checkbox-inline"><input type="checkbox" class="system_jqx_column" checked value="status"><?php echo $CI->lang->line('STATUS'); ?></label>
         </div>
@@ -89,6 +100,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 { name: 'warehouse_name', type: 'string' },
                 { name: 'pack_name', type: 'string' },
                 { name: 'quantity', type: 'string' },
+                { name: 'purpose', type: 'string' },
                 { name: 'remarks', type: 'string' },
                 { name: 'status', type: 'string' }
             ],
@@ -120,6 +132,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                     { text: '<?php echo $CI->lang->line('LABEL_WAREHOUSE'); ?>', dataField: 'warehouse_name',filtertype: 'list',width:'210'},
                     { text: 'Pack Size', dataField: 'pack_name',filtertype: 'list',width:'150'},
                     { text: '<?php echo $CI->lang->line('LABEL_QUANTITY'); ?>', dataField: 'quantity',width:'200'},
+                    { text: '<?php echo $CI->lang->line('LABEL_PURPOSE'); ?>', dataField: 'purpose',width:'150',filtertype: 'list'},
                     { text: '<?php echo $CI->lang->line('LABEL_REMARKS'); ?>', dataField: 'remarks',width:'200'},
                     { text: '<?php echo $CI->lang->line('STATUS'); ?>', dataField: 'status',filtertype: 'list',width:'150',cellsalign: 'right'}
                 ]

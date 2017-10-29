@@ -56,7 +56,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
         </div>
 
-        <div style="display: none;" class="row show-grid" id="crop_type_id_container">
+        <div style="display:none;" class="row show-grid" id="crop_type_id_container">
             <div class="col-xs-4">
                 <label for="crop_type_id" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_CROP_TYPE');?><span style="color:#FF0000">*</span></label>
             </div>
@@ -74,7 +74,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
         </div>
 
-        <div style="display: none;" class="row show-grid" id="variety_id_container">
+        <div style="display:none;" class="row show-grid" id="variety_id_container">
             <div class="col-xs-4">
                 <label for="variety_id" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_VARIETY');?><span style="color:#FF0000">*</span></label>
             </div>
@@ -91,27 +91,14 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </select>
             </div>
         </div>
-
-        <div style="display: none;" class="row show-grid" id="type_id_container">
+        <div style="display:none;" class="row show-grid" id="pack_size_id_container">
             <div class="col-xs-4">
-                <label for="type_id" class="control-label pull-right"><?php echo $CI->lang->line('LABEL_TYPE');?><span style="color:#FF0000">*</span></label>
+                <label for="pack_size_id" class="control-label pull-right">Pack Size<span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <select id="type_id" name="item[type_id]" class="form-control">
+                <select id="pack_size_id" name="item[pack_size_id]" class="form-control">
                     <option value=""><?php echo $this->lang->line('SELECT');?></option>
-                    <option value="1">BULK</option>
-                    <option value="2">PACKET</option>
-                </select>
-            </div>
-        </div>
-
-        <div style="display: none;" class="row show-grid" id="pack_size_container">
-            <div class="col-xs-4">
-                <label for="packsize_id" class="control-label pull-right">Pack Size<span style="color:#FF0000">*</span></label>
-            </div>
-            <div class="col-sm-4 col-xs-8">
-                <select id="packsize_id" name="item[packsize_id]" class="form-control">
-                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value="0"  <?php if($item['pack_size_id']==0){ echo "selected";}?>>Bulk</option>
                     <?php
                     foreach($packs as $pack)
                     {?>
@@ -123,7 +110,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             </div>
         </div>
 
-        <div style="display: none;" class="row show-grid" id="warehouse_container">
+        <div style="display:none;" class="row show-grid" id="warehouse_id_container">
             <div class="col-xs-4">
                 <label for="warehouse_id" class="control-label pull-right"><?php echo $this->lang->line('LABEL_WAREHOUSE'); ?><span style="color:#FF0000">*</span></label>
             </div>
@@ -146,16 +133,38 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label for="current_stock_id" class="control-label pull-right">Current Stock</label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <label id="current_stock_id"></label>
+                <label id="current_stock_id"><?php if(isset($item['current_stock']) && $item['pack_size_id']==0){echo number_format($item['current_stock'],3).' kg';} else{echo $item['current_stock'].' packet';}?></label>
             </div>
         </div>
 
         <div class="row show-grid">
             <div class="col-xs-4">
-                <label for="name" class="control-label pull-right"><?php echo $this->lang->line('LABEL_QUANTITY');?><span style="color:#FF0000">*</span></label>
+                <label for="quantity" class="control-label pull-right"><?php echo $this->lang->line('LABEL_QUANTITY');?><span style="color:#FF0000">*</span></label>
             </div>
             <div class="col-sm-4 col-xs-8">
                 <input type="text" name="item[quantity]" id="quantity" class="form-control float_type_positive" value="<?php echo $item['quantity'];?>"/>
+            </div>
+        </div>
+
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_STOCK_IN');?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <input type="text" name="item[date_stock_in]" id="date_stock_in" class="form-control datepicker" value="<?php echo System_helper::display_date($item['date_stock_in']);?>"/>
+            </div>
+        </div>
+
+        <div class="row show-grid">
+            <div class="col-xs-4">
+                <label for="purpose" class="control-label pull-right"><?php echo $this->lang->line('LABEL_PURPOSE'); ?><span style="color:#FF0000">*</span></label>
+            </div>
+            <div class="col-sm-4 col-xs-8">
+                <select id="purpose" name="item[purpose]" class="form-control">
+                    <option value=""><?php echo $this->lang->line('SELECT');?></option>
+                    <option value="Stock_In"><?php echo $this->lang->line('LABEL_STOCK_IN');?></option>
+                    <option value="Excess"><?php echo $this->lang->line('LABEL_EXCESS');?></option>
+                </select>
             </div>
         </div>
 
@@ -178,29 +187,27 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
     {
         system_preset({controller:'<?php echo $CI->router->class; ?>'});
 
+        $(".datepicker").datepicker({dateFormat : display_date_format});
         $(document).off('change','#crop_id');
         $(document).off('change','#crop_type_id');
         $(document).off('change','#variety_id');
-        $(document).off('change','#type_id');
-        $(document).off('change','#packsize_id');
+        $(document).off('change','#pack_size_id');
         $(document).off('change','#warehouse_id');
 
         $(document).on("change","#crop_id",function()
         {
             $("#crop_type_id").val("");
             $("#variety_id").val("");
-            $("#type_id").val("");
-            $("#packsize_id").val("");
+            $("#pack_size_id").val("");
             $("#warehouse_id").val("");
-            $("#current_stock_id").val("");
+            $("#current_stock_id").text("");
             var crop_id=$('#crop_id').val();
             if(crop_id>0)
             {
                 $('#crop_type_id_container').show();
                 $('#variety_id_container').hide();
-                $('#type_id_container').hide();
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
+                $('#pack_size_id_container').hide();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
                 $('#crop_type_id').html(get_dropdown_with_select(system_types[crop_id]));
             }
@@ -208,111 +215,98 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             {
                 $('#crop_type_id_container').hide();
                 $('#variety_id_container').hide();
-                $('#type_id_container').hide();
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
+                $('#pack_size_id_container').hide();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
             }
         });
         $(document).on("change","#crop_type_id",function()
         {
             $("#variety_id").val("");
-            $("#type_id").val("");
-            $("#packsize_id").val("");
+            $("#pack_size_id").val("");
             $("#warehouse_id").val("");
-            $("#current_stock_id").val("");
+            $("#current_stock_id").text("");
             var crop_type_id=$('#crop_type_id').val();
             if(crop_type_id>0)
             {
                 $('#variety_id_container').show();
-                $('#type_id_container').hide();
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
+                $('#pack_size_id_container').hide();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
                 $('#variety_id').html(get_dropdown_with_select(system_varieties[crop_type_id]));
             }
             else
             {
                 $('#variety_id_container').hide();
-                $('#type_id_container').hide();
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
+                $('#pack_size_id_container').hide();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
             }
         });
         $(document).on("change","#variety_id",function()
         {
-            $("#type_id").val("");
-            $("#packsize_id").val("");
+            $("#pack_size_id").val("");
             $("#warehouse_id").val("");
-            $("#current_stock_id").val("");
+            $("#current_stock_id").text("");
             var variety_id=$('#variety_id').val();
             if(variety_id>0)
             {
-                $('#type_id_container').show();
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
+                $('#pack_size_id_container').show();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
             }
             else
             {
-                $('#type_id_container').hide();
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
+                $('#pack_size_id_container').hide();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
             }
         });
-        $(document).on("change","#type_id",function()
-        {
-            $("#packsize_id").val("");
-            $("#warehouse_id").val("");
-            $("#current_stock_id").val("");
-            var type_id=$('#type_id').val();
-            if(type_id>0)
-            {
-                if(type_id==1)
-                {
-                    $('#pack_size_container').hide();
-                    $('#warehouse_container').show();
-                    $('#current_stock_container').hide();
-                }
-                else
-                {
-                    $('#pack_size_container').show();
-                    $('#warehouse_container').hide();
-                    $('#current_stock_container').hide();
-                }
-            }
-            else
-            {
-                $('#pack_size_container').hide();
-                $('#warehouse_container').hide();
-                $('#current_stock_container').hide();
-            }
-        });
-        $(document).on("change","#packsize_id",function()
+        $(document).on("change","#pack_size_id",function()
         {
             $("#warehouse_id").val("");
-            $("#current_stock_id").val("");
-            var packsize_id=$('#packsize_id').val();
-            if(packsize_id>0)
+            $("#current_stock_id").text("");
+            var pack_size_id=$('#pack_size_id').val();
+            if(pack_size_id == '')
             {
-                $('#warehouse_container').show();
+                $('#warehouse_id_container').hide();
                 $('#current_stock_container').hide();
             }
             else
             {
-                $('#warehouse_container').hide();
+                $('#warehouse_id_container').show();
                 $('#current_stock_container').hide();
             }
         });
         $(document).on("change","#warehouse_id",function()
         {
-            $("#current_stock_id").val("");
+            $("#current_stock_id").text("");
+            var variety_id=$('#variety_id').val();
+            var pack_size_id=$('#pack_size_id').val();
             var warehouse_id=$('#warehouse_id').val();
             if(warehouse_id>0)
             {
                 $('#current_stock_container').show();
+                $.ajax({
+                    url: base_url+"common_controller/get_current_stock/",
+                    type: 'POST',
+                    datatype: "JSON",
+                    data:{
+                        warehouse_id:warehouse_id,
+                        pack_size_id:pack_size_id,
+                        variety_id:variety_id
+                    },
+                    success: function (data, status)
+                    {
+                        $("#current_stock_id").text(data);
+                    },
+                    error: function (xhr, desc, err)
+                    {
+                        console.log("error");
+
+                    }
+                });
+
             }
             else
             {
