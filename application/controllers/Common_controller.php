@@ -46,7 +46,7 @@ class Common_controller extends Root_Controller
             }
             else
             {
-                $result['current_stock']=$result['current_stock'].' gm';
+                $result['current_stock']=$result['current_stock'].' kg';
             }
         }
         $ajax['system_content'][]=array("id"=>$html_container_id,"html"=>$result['current_stock'],true);

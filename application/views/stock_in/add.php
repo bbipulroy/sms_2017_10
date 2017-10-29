@@ -162,8 +162,8 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
             <div class="col-sm-4 col-xs-8">
                 <select id="purpose" name="item[purpose]" class="form-control">
                     <option value=""><?php echo $this->lang->line('SELECT');?></option>
-                    <option value="Stock_In"><?php echo $this->lang->line('LABEL_STOCK_IN');?></option>
-                    <option value="Excess"><?php echo $this->lang->line('LABEL_EXCESS');?></option>
+                    <option value="<?php echo $CI->config->item('system_stock_in');?>"><?php echo $this->lang->line('LABEL_STOCK_IN');?></option>
+                    <option value="<?php echo $CI->config->item('system_excess');?>"><?php echo $this->lang->line('LABEL_EXCESS');?></option>
                 </select>
             </div>
         </div>

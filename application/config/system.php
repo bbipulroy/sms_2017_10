@@ -13,3 +13,6 @@ $config['system_status_inactive']='In-Active';
 $config['system_status_delete']='Deleted';
 
 $config['system_base_url_profile_picture']='http://50.116.76.180/login/';
+//Stock
+$config['system_stock_in']='Stock_In';
+$config['system_excess']='Excess';

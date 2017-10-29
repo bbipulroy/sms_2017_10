@@ -68,7 +68,6 @@ class Stock_in extends Root_Controller
     private function system_get_items()
     {
         $items=array();
-
         $this->db->select('stock_in.*');
         $this->db->select('variety.name variety_name');
         $this->db->select('type.name crop_type_name');
@@ -83,7 +82,7 @@ class Stock_in extends Root_Controller
         $this->db->join($this->config->item('table_login_basic_setup_warehouse').' warehouse','warehouse.id = stock_in.warehouse_id','INNER');
         $this->db->where('stock_in.status',$this->config->item('system_status_active'));
         $this->db->or_where('stock_in.status',$this->config->item('system_status_delete'));
-        $this->db->order_by('stock_in.date_created','DESC');
+        $this->db->order_by('stock_in.date_stock_in','DESC');
         $items=$this->db->get()->result_array();
         foreach($items as &$item)
         {
@@ -96,6 +95,7 @@ class Stock_in extends Root_Controller
             {
                 $item['pack_name']=$item['pack_name'].' gm';
             }
+            $item['date_stock_in']=System_helper::display_date($item['date_stock_in']);
         }
         $this->json_return($items);
     }
@@ -242,7 +242,14 @@ class Stock_in extends Root_Controller
                 Query_helper::update($this->config->item('table_sms_stock_in'),$s_i_data,array('id='.$item_id));
 
                 $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
-                $s_data['in_stock']=$result_summary['in_stock']-$result_stock['quantity'];
+                if($result_stock['purpose']==$this->config->item('system_stock_in'))
+                {
+                    $s_data['in_stock']=$result_summary['in_stock']-$result_stock['quantity'];
+                }
+                elseif($result_stock['purpose']==$this->config->item('system_excess'))
+                {
+                    $s_data['in_excess']=$result_summary['in_excess']-$result_stock['quantity'];
+                }
                 $s_data['current_stock']=$result_summary['current_stock']-$result_stock['quantity'];
                 $s_data['date_updated'] = $time;
                 $s_data['user_updated'] = $user->user_id;
@@ -327,11 +334,11 @@ class Stock_in extends Root_Controller
                         Query_helper::update($this->config->item('table_sms_stock_in'),$data,array('id='.$id));
                         $difference=$data['quantity']-$result_stock['quantity'];
                         $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
-                        if($result_stock['purpose']=='Stock_In')
+                        if($result_stock['purpose']==$this->config->item('system_stock_in'))
                         {
                             $s_data['in_stock']=$result_summary['in_stock']+$difference;
                         }
-                        elseif($result_stock['purpose']=='Excess')
+                        elseif($result_stock['purpose']==$this->config->item('system_excess'))
                         {
                             $s_data['in_excess']=$result_summary['in_excess']+$difference;
                         }
@@ -353,11 +360,11 @@ class Stock_in extends Root_Controller
                 $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$data['variety_id'],'pack_size_id ='.$data['pack_size_id'],'warehouse_id ='.$data['warehouse_id']),1);
                 if($result)
                 {
-                    if($data['purpose']=='Stock_In')
+                    if($data['purpose']==$this->config->item('system_stock_in'))
                     {
                         $s_data['in_stock']=$data['quantity']+$result['in_stock'];
                     }
-                    elseif($data['purpose']=='Excess')
+                    elseif($data['purpose']==$this->config->item('system_excess'))
                     {
                         $s_data['in_excess']=$data['quantity']+$result['in_excess'];
                     }
@@ -371,11 +378,11 @@ class Stock_in extends Root_Controller
                     $s_data['variety_id'] = $data['variety_id'];
                     $s_data['pack_size_id'] = $data['pack_size_id'];
                     $s_data['warehouse_id'] = $data['warehouse_id'];
-                    if($data['purpose']=='Stock_In')
+                    if($data['purpose']==$this->config->item('system_stock_in'))
                     {
                         $s_data['in_stock']=$data['quantity'];
                     }
-                    elseif($data['purpose']=='Excess')
+                    elseif($data['purpose']==$this->config->item('system_excess'))
                     {
                         $s_data['in_excess']=$data['quantity'];
                     }
