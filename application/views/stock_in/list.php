@@ -127,7 +127,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 altrows: true,
                 autoheight: true,
                 columns: [
-                    { text: '<?php echo $CI->lang->line('ID'); ?>', dataField: 'id',width:'100',hidden:true},
+                    { text: '<?php echo $CI->lang->line('ID'); ?>', dataField: 'id',width:'75',hidden:true},
                     { text: '<?php echo $CI->lang->line('LABEL_DATE_STOCK_IN'); ?>', dataField: 'date_stock_in',width:'120'},
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_NAME'); ?>', dataField: 'crop_name',width:'200',hidden:true},
                     { text: '<?php echo $CI->lang->line('LABEL_CROP_TYPE'); ?>', dataField: 'crop_type_name',width:'200',hidden:true},

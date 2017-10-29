@@ -89,11 +89,12 @@ class Stock_in extends Root_Controller
             if(!$item['pack_name'])
             {
                 $item['pack_name']='Bulk';
-                $item['quantity']=number_format($item['quantity'],3);
+                $item['quantity']=number_format($item['quantity'],3).' kg';
             }
             else
             {
                 $item['pack_name']=$item['pack_name'].' gm';
+                $item['quantity']=$item['quantity'].' packet';
             }
             $item['date_stock_in']=System_helper::display_date($item['date_stock_in']);
         }

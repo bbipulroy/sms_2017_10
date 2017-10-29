@@ -98,7 +98,7 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DATE_STOCK_IN');?></label>
             </div>
             <div class="col-sm-4 col-xs-8">
-                <label class="control-label"><?php echo System_helper::display_date_time($item['date_stock_in']); ?></label>
+                <label class="control-label"><?php echo System_helper::display_date($item['date_stock_in']); ?></label>
             </div>
         </div>
 
