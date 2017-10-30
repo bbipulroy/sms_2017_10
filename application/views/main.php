@@ -14,6 +14,33 @@ foreach($results as $result)
 {
     $system_varieties[$result['crop_type_id']][]=$result;
 }
+
+$system_divisions=Query_helper::get_info($CI->config->item('table_login_setup_location_divisions'),array('id value','name text'),array('status ="'.$CI->config->item('system_status_active').'"'));
+
+$results=Query_helper::get_info($CI->config->item('table_login_setup_location_zones'),array('id value','name text','division_id'),array('status ="'.$CI->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+$system_zones=array();
+foreach($results as $result)
+{
+    $system_zones[$result['division_id']][]=$result;
+}
+$results=Query_helper::get_info($CI->config->item('table_login_setup_location_territories'),array('id value','name text','zone_id'),array('status ="'.$CI->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+$system_territories=array();
+foreach($results as $result)
+{
+    $system_territories[$result['zone_id']][]=$result;
+}
+$results=Query_helper::get_info($CI->config->item('table_login_setup_location_districts'),array('id value','name text','territory_id'),array('status ="'.$CI->config->item('system_status_active').'"'),0,0,array('ordering ASC'));
+$system_districts=array();
+foreach($results as $result)
+{
+    $system_districts[$result['territory_id']][]=$result;
+}
+$results=Query_helper::get_info($CI->config->item('table_login_csetup_cus_info'),array('customer_id value','name text','district_id'),array('type ='.$CI->config->item('system_customer_type_customer_id'),'revision =1'),0,0,array('ordering ASC'));
+$system_customers=array();
+foreach($results as $result)
+{
+    $system_customers[$result['district_id']][]=$result;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -77,6 +104,11 @@ foreach($results as $result)
             var system_crops=JSON.parse('<?php echo json_encode($system_crops);?>');
             var system_types=JSON.parse('<?php echo json_encode($system_types);?>');
             var system_varieties=JSON.parse('<?php echo json_encode($system_varieties);?>');
+            var system_divisions=JSON.parse('<?php echo json_encode($system_divisions);?>');
+            var system_zones=JSON.parse('<?php echo json_encode($system_zones);?>');
+            var system_territories=JSON.parse('<?php echo json_encode($system_territories);?>');
+            var system_districts=JSON.parse('<?php echo json_encode($system_districts);?>');
+            var system_customers=JSON.parse('<?php echo json_encode($system_customers);?>');
         </script>
         <header class="hidden-print">
 

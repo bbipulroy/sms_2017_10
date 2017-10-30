@@ -13,6 +13,14 @@ $config['system_status_inactive']='In-Active';
 $config['system_status_delete']='Deleted';
 
 $config['system_base_url_profile_picture']='http://50.116.76.180/login/';
+
 //Stock
 $config['system_stock_in']='Stock_In';
 $config['system_excess']='Excess';
+$config['system_purpose_rnd']='out_stock_rnd';
+$config['system_purpose_short_inventory']='out_stock_short_inventory';
+$config['system_purpose_demonstration']='out_stock_demonstration';
+$config['system_purpose_sample']='out_stock_sample';
+
+$config['system_customer_type_outlet_id']=1;
+$config['system_customer_type_customer_id']=2;

@@ -230,14 +230,20 @@ $lang['LABEL_PACK_SIZE']='Pack Size';
 $lang['LABEL_RECEIVED_STATUS']='Received Status';
 $lang['LABEL_CLOSED_STATUS']='Closed Status';
 
-//Stock
-$lang['LABEL_WAREHOUSE'] = 'Warehouse';
-$lang['LABEL_PURPOSE'] = 'Purpose';
-
 //crop classification
 $lang['LABEL_CROP_NAME']='Crop';
 $lang['LABEL_CROP_TYPE']='Crop Type';
 $lang['LABEL_VARIETY']='Variety';
 $lang['LABEL_DATE_STOCK_IN']='Stock In date';
+$lang['LABEL_DATE_STOCK_OUT']='Stock Out date';
 $lang['LABEL_STOCK_IN']='Stock In';
+$lang['LABEL_STOCK_OUT']='Stock Out';
 $lang['LABEL_EXCESS']='Excess';
+
+//Stock
+$lang['LABEL_WAREHOUSE'] = 'Warehouse';
+$lang['LABEL_PURPOSE'] = 'Purpose';
+$lang['LABEL_STOCK_OUT_PURPOSE_SHORT'] = 'Short Inventory';
+$lang['LABEL_STOCK_OUT_PURPOSE_RND'] = 'R&D Purpose';
+$lang['LABEL_STOCK_OUT_PURPOSE_SAMPLE'] = 'Sample Purpose';
+$lang['LABEL_STOCK_OUT_PURPOSE_DEMONSTRATION'] = 'Demonstration';
