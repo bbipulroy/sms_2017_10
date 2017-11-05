@@ -165,6 +165,7 @@ $lang['LABEL_DATE_START'] = 'Starting Date';
 $lang['LABEL_DATE_END'] = 'End Date';
 
 //customer
+$lang['LABEL_CUSTOMER_NAME'] = 'Customer';
 $lang['LABEL_CUSTOMER_CODE'] = 'Customer Code';
 $lang['LABEL_PHONE'] = 'Phone';
 $lang['LABEL_NAME_OWNER'] = 'Owner Name';
@@ -242,6 +243,7 @@ $lang['LABEL_EXCESS']='Excess';
 
 //Stock
 $lang['LABEL_WAREHOUSE'] = 'Warehouse';
+$lang['LABEL_CURRENT_STOCK'] = 'Current Stock (Pack/Kg)';
 $lang['LABEL_PURPOSE'] = 'Purpose';
 $lang['LABEL_STOCK_OUT_PURPOSE_SHORT'] = 'Short Inventory';
 $lang['LABEL_STOCK_OUT_PURPOSE_RND'] = 'R&D Purpose';

@@ -106,13 +106,7 @@ class Stock_out extends Root_Controller
             $time=time();
             $data['title']="Stock Out Here";
             $data["item"] = Array(
-                'id' => 0,
-                'crop_id'=>0,
-                'crop_type_id'=>0,
-                'variety_id'=>0,
-                'pack_size_id' => -1,
-                'warehouse_id' => '',
-                'quantity' => '',
+                'id'=>'',
                 'date_stock_out' => $time,
                 'purpose' => '',
                 'remarks' => ''
@@ -292,6 +286,12 @@ class Stock_out extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
+            if(!$this->check_validation_edit())
+            {
+                $ajax['status']=false;
+                $ajax['system_message']=$this->message;
+                $this->json_return($ajax);
+            }
         }
         else
         {
@@ -301,136 +301,115 @@ class Stock_out extends Root_Controller
                 $ajax['system_message']=$this->lang->line("YOU_DONT_HAVE_ACCESS");
                 $this->json_return($ajax);
             }
-        }
-
-        if(!$this->check_validation())
-        {
-            $ajax['status']=false;
-            $ajax['system_message']=$this->message;
-            $this->json_return($ajax);
-        }
-        else
-        {
-            $data = $this->input->post('item');
-            $this->db->trans_start();  //DB Transaction Handle START
-            if($id>0)
-            {
-                $result_stock=Query_helper::get_info($this->config->item('table_sms_stock_in'),'*',array('id='.$id),1);
-                if(!$result_stock)
-                {
-                    $ajax['status']=false;
-                    $ajax['system_message']='Invalid Try';
-                    $this->json_return($ajax);
-                    die();
-                }
-                else
-                {
-                    if($result_stock['quantity']==$data['quantity'])
-                    {
-                        $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
-                        $this->system_list();
-                    }
-                    else
-                    {
-                        $data['date_updated'] = $time;
-                        $data['user_updated'] = $user->user_id;
-                        Query_helper::update($this->config->item('table_sms_stock_in'),$data,array('id='.$id));
-                        $difference=$data['quantity']-$result_stock['quantity'];
-                        $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
-                        if($result_stock['purpose']==$this->config->item('system_stock_in'))
-                        {
-                            $s_data['in_stock']=$result_summary['in_stock']+$difference;
-                        }
-                        elseif($result_stock['purpose']==$this->config->item('system_excess'))
-                        {
-                            $s_data['in_excess']=$result_summary['in_excess']+$difference;
-                        }
-                        $s_data['current_stock']=$result_summary['current_stock']+$difference;
-                        $s_data['date_updated'] = $time;
-                        $s_data['user_updated'] = $user->user_id;
-                        Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result_summary['id']));
-                    }
-                }
-            }
-            else
-            {
-                $data['date_stock_in'] = System_helper::get_time($data['date_stock_in']);
-                $data['status'] = $this->config->item('system_status_active');
-                $data['user_created'] = $user->user_id;
-                $data['date_created'] = time();
-                Query_helper::add($this->config->item('table_sms_stock_in'),$data);
-
-                $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$data['variety_id'],'pack_size_id ='.$data['pack_size_id'],'warehouse_id ='.$data['warehouse_id']),1);
-                if($result)
-                {
-                    if($data['purpose']==$this->config->item('system_stock_in'))
-                    {
-                        $s_data['in_stock']=$data['quantity']+$result['in_stock'];
-                    }
-                    elseif($data['purpose']==$this->config->item('system_excess'))
-                    {
-                        $s_data['in_excess']=$data['quantity']+$result['in_excess'];
-                    }
-                    $s_data['current_stock'] = $data['quantity']+$result['current_stock'];
-                    $s_data['date_updated'] = $time;
-                    $s_data['user_updated'] = $user->user_id;
-                    Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result['id']));
-                }
-                else
-                {
-                    $s_data['variety_id'] = $data['variety_id'];
-                    $s_data['pack_size_id'] = $data['pack_size_id'];
-                    $s_data['warehouse_id'] = $data['warehouse_id'];
-                    if($data['purpose']==$this->config->item('system_stock_in'))
-                    {
-                        $s_data['in_stock']=$data['quantity'];
-                    }
-                    elseif($data['purpose']==$this->config->item('system_excess'))
-                    {
-                        $s_data['in_excess']=$data['quantity'];
-                    }
-                    $s_data['current_stock'] = $data['quantity'];
-                    $s_data['date_updated'] = $time;
-                    $s_data['user_updated'] = $user->user_id;
-                    Query_helper::add($this->config->item('table_sms_stock_summary'),$s_data);
-                }
-            }
-
-            $this->db->trans_complete();   //DB Transaction Handle END
-            if ($this->db->trans_status() === TRUE)
-            {
-                $save_and_new=$this->input->post('system_save_new_status');
-                $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
-                if($save_and_new==1)
-                {
-                    $this->system_add();
-                }
-                else
-                {
-                    $this->system_list();
-                }
-            }
-            else
+            if(!$this->check_validation_add())
             {
                 $ajax['status']=false;
-                $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+                $ajax['system_message']=$this->message;
                 $this->json_return($ajax);
             }
         }
-    }
-    private function check_validation()
-    {
-        $id=$this->input->post('id');
-        $this->load->library('form_validation');
-        if($id==0)
+
+        $data = $this->input->post('item');
+        
+        $this->db->trans_start();  //DB Transaction Handle START
+        
+        if($id>0)
         {
-            $this->form_validation->set_rules('item[variety_id]',$this->lang->line('LABEL_VARIETY'),'required');
-            $this->form_validation->set_rules('item[pack_size_id]','Pack Size','required');
-            $this->form_validation->set_rules('item[warehouse_id]',$this->lang->line('LABEL_WAREHOUSE'),'required');
-            $this->form_validation->set_rules('item[purpose]',$this->lang->line('LABEL_PURPOSE'),'required');
-            $this->form_validation->set_rules('item[date_stock_in]',$this->lang->line('LABEL_DATE_STOCK_IN'),'required');
+            /*$result_stock=Query_helper::get_info($this->config->item('table_sms_stock_in'),'*',array('id='.$id),1);
+            if(!$result_stock)
+            {
+                $ajax['status']=false;
+                $ajax['system_message']='Invalid Try';
+                $this->json_return($ajax);
+                die();
+            }
+            else
+            {
+                if($result_stock['quantity']==$data['quantity'])
+                {
+                    $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+                    $this->system_list();
+                }
+                else
+                {
+                    $data['date_updated'] = $time;
+                    $data['user_updated'] = $user->user_id;
+                    Query_helper::update($this->config->item('table_sms_stock_in'),$data,array('id='.$id));
+                    $difference=$data['quantity']-$result_stock['quantity'];
+                    $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
+                    if($result_stock['purpose']==$this->config->item('system_stock_in'))
+                    {
+                        $s_data['in_stock']=$result_summary['in_stock']+$difference;
+                    }
+                    elseif($result_stock['purpose']==$this->config->item('system_excess'))
+                    {
+                        $s_data['in_excess']=$result_summary['in_excess']+$difference;
+                    }
+                    $s_data['current_stock']=$result_summary['current_stock']+$difference;
+                    $s_data['date_updated'] = $time;
+                    $s_data['user_updated'] = $user->user_id;
+                    Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result_summary['id']));
+                }
+            }*/
         }
-        $this->form_validation->set_rules('item[quantity]',$this->lang->line('LABEL_QUANTITY'),'required');
+        else
+        {
+            $items=$this->input->post('items');
+            foreach($items as $item)
+            {
+                #
+            }
+
+            $data['date_stock_out']=System_helper::get_time($data['date_stock_out']);
+            $data['user_created']=$user->user_id;
+            $data['date_created']=$time;
+            $data['status']=$this->config->item('system_status_active');
+
+            foreach($items as $item)
+            {
+                $data['variety_id']=$item['variety_id'];
+                $data['pack_size_id']=$item['pack_size_id'];
+                $data['warehouse_id']=$item['warehouse_id'];
+                $data['quantity']=$item['quantity'];
+            }
+
+            /*
+            Query_helper::add($this->config->item('table_sms_stock_in'),$data);
+            $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$data['variety_id'],'pack_size_id ='.$data['pack_size_id'],'warehouse_id ='.$data['warehouse_id']),1);
+            */
+        }
+
+        $this->db->trans_complete();   //DB Transaction Handle END
+        if ($this->db->trans_status() === TRUE)
+        {
+            $save_and_new=$this->input->post('system_save_new_status');
+            $this->message=$this->lang->line("MSG_SAVED_SUCCESS");
+            if($save_and_new==1)
+            {
+                $this->system_add();
+            }
+            else
+            {
+                $this->system_list();
+            }
+        }
+        else
+        {
+            $ajax['status']=false;
+            $ajax['system_message']=$this->lang->line("MSG_SAVED_FAIL");
+            $this->json_return($ajax);
+        }
+    }
+    private function check_validation_add()
+    {
+        $data=$this->input->post('item');
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('item[date_stock_out]',$this->lang->line('LABEL_DATE_STOCK_OUT'),'required');
+        $this->form_validation->set_rules('item[purpose]',$this->lang->line('LABEL_PURPOSE'),'required');
+        if($data['purpose']==$this->config->item('system_purpose_variety_sample'))
+        {
+            $this->form_validation->set_rules('item[customer_name]',$this->lang->line('LABEL_CUSTOMER_NAME'),'required');
+        }
         if($this->form_validation->run() == FALSE)
         {
             $this->message=validation_errors();
