@@ -94,7 +94,7 @@ class Stock_out extends Root_Controller
             else
             {
                 $item['pack_name']=$item['pack_name'].' gm';
-                $item['quantity']=number_format($item['quantity'],3).' packet';
+                $item['quantity']=$item['quantity'].' packet';
             }
 
             $item['date_stock_out']=System_helper::display_date($item['date_stock_out']);
