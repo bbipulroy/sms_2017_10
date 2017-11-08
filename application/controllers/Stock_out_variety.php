@@ -413,7 +413,7 @@ class Stock_out_variety extends Root_Controller
         
         if($id>0)
         {
-            $result=Query_helper::get_info($this->config->item('table_sms_stock_out_variety'),'*',array('id='.$id,'status='.$this->config->item('system_status_active')),1);
+            $result=Query_helper::get_info($this->config->item('table_sms_stock_out_variety'),'*',array('id='.$id,'status="'.$this->config->item('system_status_active').'"'),1);
             if(!$result)
             {
                 $ajax['status']=false;
@@ -490,12 +490,27 @@ class Stock_out_variety extends Root_Controller
 
             foreach($items as $item)
             {
-                $result=Query_helper::get_info($this->config->item('table_sms_stock_summary_variety'),'current_stock',array('variety_id ='.$item['variety_id'],'pack_size_id ='.$item['pack_size_id'],'warehouse_id ='.$item['warehouse_id']),1);
-                $current_stock=$result['current_stock']-$item['quantity'];
-                if(!$result || $current_stock<0)
+                if($item['variety_id']==0 || $item['pack_size_id']<0 || $item['warehouse_id']==0 || $item['quantity']=='')
                 {
                     $ajax['status']=false;
-                    $ajax['system_message']='Stock Out exceed. Please contact store incharge.';
+                    $ajax['system_message']='Unfinished stock out entry.';
+                    $this->json_return($ajax);
+                }
+            }
+            foreach($items as $item)
+            {
+                $result=Query_helper::get_info($this->config->item('table_sms_stock_summary_variety'),'current_stock',array('variety_id ='.$item['variety_id'],'pack_size_id ='.$item['pack_size_id'],'warehouse_id ='.$item['warehouse_id']),1);
+                if(!$result)
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='You submit stock out entries with <b>Not Found</b> status stock';
+                    $this->json_return($ajax);
+                }
+                $current_stock=$result['current_stock']-$item['quantity'];
+                if($current_stock<0)
+                {
+                    $ajax['status']=false;
+                    $ajax['system_message']='Stock Out exceeded. Please contact with store incharge.';
                     $this->json_return($ajax);
                 }
                 $data['variety_id']=$item['variety_id'];
