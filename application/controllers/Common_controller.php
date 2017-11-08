@@ -33,7 +33,7 @@ class Common_controller extends Root_Controller
         {
             $html_container_id=$this->input->post('html_container_id');
         }
-        $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'current_stock',array('variety_id ='.$variety_id,'pack_size_id ='.$pack_size_id,'warehouse_id ='.$warehouse_id),1);
+        $result=Query_helper::get_info($this->config->item('table_sms_stock_summary_variety'),'current_stock',array('variety_id ='.$variety_id,'pack_size_id ='.$pack_size_id,'warehouse_id ='.$warehouse_id),1);
         if(!$result)
         {
             $result['current_stock']='Not Found';

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Stock_in extends Root_Controller
+class Stock_in_variety extends Root_Controller
 {
     private $message;
     public $permissions;
@@ -9,8 +9,8 @@ class Stock_in extends Root_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->permissions=User_helper::get_permission('Stock_in');
-        $this->controller_url='stock_in';
+        $this->permissions=User_helper::get_permission('Stock_in_variety');
+        $this->controller_url='stock_in_variety';
     }
     public function index($action='list',$id=0)
     {
@@ -74,7 +74,7 @@ class Stock_in extends Root_Controller
         $this->db->select('crop.name crop_name');
         $this->db->select('pack.name pack_name');
         $this->db->select('warehouse.name warehouse_name');
-        $this->db->from($this->config->item('table_sms_stock_in').' stock_in');
+        $this->db->from($this->config->item('table_sms_stock_in_variety').' stock_in');
         $this->db->join($this->config->item('table_login_setup_classification_varieties').' variety','variety.id = stock_in.variety_id','INNER');
         $this->db->join($this->config->item('table_login_setup_classification_crop_types').' type','type.id = variety.crop_type_id','INNER');
         $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
@@ -168,13 +168,13 @@ class Stock_in extends Root_Controller
             $this->db->select('pack.name pack_name');
             $this->db->select('warehouse.name warehouse_name');
             $this->db->select('summary.current_stock');
-            $this->db->from($this->config->item('table_sms_stock_in').' stock_in');
+            $this->db->from($this->config->item('table_sms_stock_in_variety').' stock_in');
             $this->db->join($this->config->item('table_login_setup_classification_varieties').' variety','variety.id = stock_in.variety_id','INNER');
             $this->db->join($this->config->item('table_login_setup_classification_crop_types').' type','type.id = variety.crop_type_id','INNER');
             $this->db->join($this->config->item('table_login_setup_classification_crops').' crop','crop.id = type.crop_id','INNER');
             $this->db->join($this->config->item('table_login_setup_classification_vpack_size').' pack','pack.id = stock_in.pack_size_id','LEFT');
             $this->db->join($this->config->item('table_login_basic_setup_warehouse').' warehouse','warehouse.id = stock_in.warehouse_id','INNER');
-            $this->db->join($this->config->item('table_sms_stock_summary').' summary','summary.variety_id = stock_in.variety_id AND summary.pack_size_id = stock_in.pack_size_id AND summary.warehouse_id = stock_in.warehouse_id','INNER');
+            $this->db->join($this->config->item('table_sms_stock_summary_variety').' summary','summary.variety_id = stock_in.variety_id AND summary.pack_size_id = stock_in.pack_size_id AND summary.warehouse_id = stock_in.warehouse_id','INNER');
             $this->db->where('stock_in.id',$item_id);
             $data['item']=$this->db->get()->row_array();
             if(!$data['item'])
@@ -236,7 +236,7 @@ class Stock_in extends Root_Controller
             }
             $user = User_helper::get_user();
             $time = time();
-            $result_stock=Query_helper::get_info($this->config->item('table_sms_stock_in'),'*',array('id='.$item_id),1);
+            $result_stock=Query_helper::get_info($this->config->item('table_sms_stock_in_variety'),'*',array('id='.$item_id),1);
             if(!$result_stock)
             {
                 $ajax['status']=false;
@@ -257,9 +257,9 @@ class Stock_in extends Root_Controller
                 $s_i_data['status'] = $this->config->item('system_status_delete');
                 $s_i_data['date_updated'] = $time;
                 $s_i_data['user_updated'] = $user->user_id;
-                Query_helper::update($this->config->item('table_sms_stock_in'),$s_i_data,array('id='.$item_id));
+                Query_helper::update($this->config->item('table_sms_stock_in_variety'),$s_i_data,array('id='.$item_id));
 
-                $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
+                $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary_variety'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
                 if($result_stock['purpose']==$this->config->item('system_purpose_variety_stock_in'))
                 {
                     $s_data['in_stock']=$result_summary['in_stock']-$result_stock['quantity'];
@@ -271,7 +271,7 @@ class Stock_in extends Root_Controller
                 $s_data['current_stock']=$result_summary['current_stock']-$result_stock['quantity'];
                 $s_data['date_updated'] = $time;
                 $s_data['user_updated'] = $user->user_id;
-                Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result_summary['id']));
+                Query_helper::update($this->config->item('table_sms_stock_summary_variety'),$s_data,array('id='.$result_summary['id']));
                 $this->db->trans_complete();   //DB Transaction Handle END
                 if ($this->db->trans_status() === TRUE)
                 {
@@ -330,7 +330,7 @@ class Stock_in extends Root_Controller
             $this->db->trans_start();  //DB Transaction Handle START
             if($id>0)
             {
-                $result_stock=Query_helper::get_info($this->config->item('table_sms_stock_in'),'*',array('id='.$id),1);
+                $result_stock=Query_helper::get_info($this->config->item('table_sms_stock_in_variety'),'*',array('id='.$id),1);
                 if(!$result_stock)
                 {
                     $ajax['status']=false;
@@ -349,9 +349,9 @@ class Stock_in extends Root_Controller
                     {
                         $data['date_updated'] = $time;
                         $data['user_updated'] = $user->user_id;
-                        Query_helper::update($this->config->item('table_sms_stock_in'),$data,array('id='.$id));
+                        Query_helper::update($this->config->item('table_sms_stock_in_variety'),$data,array('id='.$id));
                         $difference=$data['quantity']-$result_stock['quantity'];
-                        $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
+                        $result_summary=Query_helper::get_info($this->config->item('table_sms_stock_summary_variety'),'*',array('variety_id ='.$result_stock['variety_id'],'pack_size_id ='.$result_stock['pack_size_id'],'warehouse_id ='.$result_stock['warehouse_id']),1);
                         if($result_stock['purpose']==$this->config->item('system_purpose_variety_stock_in'))
                         {
                             $s_data['in_stock']=$result_summary['in_stock']+$difference;
@@ -363,7 +363,7 @@ class Stock_in extends Root_Controller
                         $s_data['current_stock']=$result_summary['current_stock']+$difference;
                         $s_data['date_updated'] = $time;
                         $s_data['user_updated'] = $user->user_id;
-                        Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result_summary['id']));
+                        Query_helper::update($this->config->item('table_sms_stock_summary_variety'),$s_data,array('id='.$result_summary['id']));
                     }
                 }
             }
@@ -373,9 +373,9 @@ class Stock_in extends Root_Controller
                 $data['status'] = $this->config->item('system_status_active');
                 $data['user_created'] = $user->user_id;
                 $data['date_created'] = time();
-                Query_helper::add($this->config->item('table_sms_stock_in'),$data);
+                Query_helper::add($this->config->item('table_sms_stock_in_variety'),$data);
 
-                $result=Query_helper::get_info($this->config->item('table_sms_stock_summary'),'*',array('variety_id ='.$data['variety_id'],'pack_size_id ='.$data['pack_size_id'],'warehouse_id ='.$data['warehouse_id']),1);
+                $result=Query_helper::get_info($this->config->item('table_sms_stock_summary_variety'),'*',array('variety_id ='.$data['variety_id'],'pack_size_id ='.$data['pack_size_id'],'warehouse_id ='.$data['warehouse_id']),1);
                 if($result)
                 {
                     if($data['purpose']==$this->config->item('system_purpose_variety_stock_in'))
@@ -389,7 +389,7 @@ class Stock_in extends Root_Controller
                     $s_data['current_stock'] = $data['quantity']+$result['current_stock'];
                     $s_data['date_updated'] = $time;
                     $s_data['user_updated'] = $user->user_id;
-                    Query_helper::update($this->config->item('table_sms_stock_summary'),$s_data,array('id='.$result['id']));
+                    Query_helper::update($this->config->item('table_sms_stock_summary_variety'),$s_data,array('id='.$result['id']));
                 }
                 else
                 {
@@ -407,7 +407,7 @@ class Stock_in extends Root_Controller
                     $s_data['current_stock'] = $data['quantity'];
                     $s_data['date_updated'] = $time;
                     $s_data['user_updated'] = $user->user_id;
-                    Query_helper::add($this->config->item('table_sms_stock_summary'),$s_data);
+                    Query_helper::add($this->config->item('table_sms_stock_summary_variety'),$s_data);
                 }
             }
 
