@@ -105,9 +105,45 @@ $CI->load->view('action_buttons',array('action_buttons'=>$action_buttons));
                 </label>
             </div>
         </div>
-        <!--
-            Here D,Z,T,D & Customer Name
-        -->
+        <?php
+            if($item['customer_id']>0)
+            {
+                ?>
+                <div class="row show-grid">
+                    <div class="col-xs-4">
+                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DIVISION_NAME'); ?></label>
+                    </div>
+                    <div class="col-sm-4 col-xs-8">
+                        <label class="control-label"><?php echo $item['division_name'];?></label>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-4">
+                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_ZONE_NAME'); ?></label>
+                    </div>
+                    <div class="col-sm-4 col-xs-8">
+                        <label class="control-label"><?php echo $item['zone_name'];?></label>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-4">
+                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_TERRITORY_NAME'); ?></label>
+                    </div>
+                    <div class="col-sm-4 col-xs-8">
+                        <label class="control-label"><?php echo $item['territory_name'];?></label>
+                    </div>
+                </div>
+                <div class="row show-grid">
+                    <div class="col-xs-4">
+                        <label class="control-label pull-right"><?php echo $this->lang->line('LABEL_DISTRICT_NAME'); ?></label>
+                    </div>
+                    <div class="col-sm-4 col-xs-8">
+                        <label class="control-label"><?php echo $item['district_name'];?></label>
+                    </div>
+                </div>
+                <?php
+            }
+        ?>
         <div class="row show-grid">
             <div class="col-xs-4">
                 <label for="quantity" class="control-label pull-right"><?php echo $this->lang->line('LABEL_QUANTITY'); ?><span style="color:#FF0000">*</span></label>
